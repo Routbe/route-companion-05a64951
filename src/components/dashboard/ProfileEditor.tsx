@@ -1054,35 +1054,49 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
               onValueChange={(v) => setSettingsSection(v || undefined)}
             >
               <AccordionItem
-                value="account_billing"
+                value="billing"
                 className="rounded-2xl border border-border bg-card px-4 sm:px-5"
               >
                 <AccordionTrigger className="hover:no-underline">
-                  <span className="text-base font-medium">💳 Account, Data &amp; Facturatie</span>
+                  <span className="text-base font-medium">💳 Betalingen &amp; facturen</span>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4 pb-5">
                   <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
-                    <h2 className="text-lg font-medium">Betalingen, data &amp; domein</h2>
+                    <h2 className="text-lg font-medium">Betaalmethodes &amp; facturatie</h2>
                     <p className="text-sm text-muted-foreground">
-                      Facturen, betaalmethodes, data-export en je eigen domein staan nu bij je
+                      Je facturen, abonnement en betaalmethodes beheer je bij je
                       accountinstellingen.
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      <a
-                        href="/settings?tab=payments"
-                        className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-                      >
-                        Betalingen &amp; facturen →
-                      </a>
-                      <a
-                        href="/settings?tab=data"
-                        className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-                      >
-                        Data &amp; domein →
-                      </a>
-                    </div>
-                    <div className="h-px bg-border" />
-                    <VerifiedBadgeCard verified={verified} handle={handle || null} />
+                    <a
+                      href="/settings?tab=payments"
+                      className="inline-block rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                    >
+                      Betalingen &amp; facturen →
+                    </a>
+                  </section>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem
+                value="data_domain"
+                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <span className="text-base font-medium">📦 Data, export &amp; domein</span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-5">
+                  <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+                    <h2 className="text-lg font-medium">Jouw data &amp; eigen domein</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Data-export, verwijdering en je eigen domein staan bij je
+                      accountinstellingen.
+                    </p>
+                    <a
+                      href="/settings?tab=data"
+                      className="inline-block rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                    >
+                      Data &amp; domein →
+                    </a>
                   </section>
                 </AccordionContent>
               </AccordionItem>
