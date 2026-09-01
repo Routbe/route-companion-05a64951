@@ -1111,9 +1111,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                 className="rounded-2xl border border-border bg-card px-4 sm:px-5"
               >
                 <AccordionTrigger className="hover:no-underline">
-                  <span className="text-base font-medium">
-                    🛡️ Identiteitsverificatie &amp; ROUT Badges
-                  </span>
+                  <span className="text-base font-medium">🔗 Handle, URL &amp; identiteit</span>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4 pb-5">
                   <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
