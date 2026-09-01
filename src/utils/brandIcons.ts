@@ -262,8 +262,16 @@ export function lookupBrandIcon(urlOrKey: string): BrandIcon | null {
     }
   }
 
-  // Fediverse-handle (@iemand@instantie.tld) is altijd Mastodon.
-  if (/^@?[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(raw)) return BRAND_ICONS.mastodon ?? null;
+  // Fediverse-handle (@iemand@instantie.tld): eerst de instantie herkennen
+  // (eyou.social heeft een eigen merk), pas daarna terugvallen op Mastodon.
+  const handle = raw.match(/^@?[^@\s]+@([^@\s]+\.[a-z]{2,})$/i);
+  if (handle) {
+    const instance = handle[1]!.toLowerCase().replace(/^www\./, "");
+    for (const [pattern, mapped] of HOST_KEYS) {
+      if (pattern.test(instance)) return BRAND_ICONS[mapped] ?? null;
+    }
+    return BRAND_ICONS.mastodon ?? null;
+  }
 
   return null;
 }
