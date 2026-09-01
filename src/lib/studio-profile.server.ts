@@ -217,26 +217,47 @@ export async function isHandleFree(rawHandle: string, userId: string | null) {
 export async function readPublicProfile(rawHandle: string) {
   const username = normalizeHandle(rawHandle);
   if (!username) return null;
-  const rows = (await sql`
-    select id, username, display_name, tagline, bio, avatar_url, favicon_url, theme, card_style,
-           blocks, verified, verified_at, created_at, is_early_believer,
-           status, is_suspended, is_banned, url_style, verified_legal_name,
-           coalesce(show_total_reach, false) as show_total_reach,
-           coalesce(total_reach_count, 0) as total_reach_count,
-           to_jsonb(profiles) -> 'display_prefs' as display_prefs
-      from public.profiles
-     where (lower(username) = ${username}
-            or lower(coalesce(subdomain_alias, '')) = ${username})
-       and coalesce(is_banned, false) = false
-     order by (lower(username) = ${username}) desc
-     limit 1
-  `) as Row[];
+  let rows: Row[];
+  try {
+    rows = (await sql`
+      select id, username, display_name, tagline, bio, avatar_url, favicon_url, theme, card_style,
+             blocks, verified, verified_at, created_at, is_early_believer,
+             status, is_suspended, is_banned, url_style, verified_legal_name,
+             coalesce(show_total_reach, false) as show_total_reach,
+             coalesce(total_reach_count, 0) as total_reach_count,
+             to_jsonb(profiles) -> 'display_prefs' as display_prefs
+        from public.profiles
+       where (lower(username) = ${username}
+              or lower(coalesce(subdomain_alias, '')) = ${username})
+         and coalesce(is_banned, false) = false
+       order by (lower(username) = ${username}) desc
+       limit 1
+    `) as Row[];
+  } catch (error) {
+    // Eén ontbrekende migratie (display_prefs, total_reach, subdomain_alias, …)
+    // mag de publieke profielpagina nooit laten falen: val terug op de
+    // kernkolommen die in elke schemaversie bestaan.
+    console.warn("[public-profile:fallback]", username, error);
+    rows = (await sql`
+      select id, username, display_name, tagline, avatar_url, theme, card_style,
+             blocks, verified, created_at
+        from public.profiles
+       where lower(username) = ${username}
+       limit 1
+    `) as Row[];
+  }
   const profile = rows[0];
   if (!profile) return null;
   // Gecachte sociale volgeraantallen: één goedkope join-vrije query, geen
-  // externe HTTP-calls tijdens het laden van de publieke pagina.
-  const { readPublicSocialLinks } = await import("./social-verify.server");
-  const socialLinks = await readPublicSocialLinks(profile["id"] as string);
+  // externe HTTP-calls tijdens het laden van de publieke pagina. Een storing
+  // hier mag het profiel zelf nooit mee naar beneden trekken.
+  let socialLinks: unknown[] = [];
+  try {
+    const { readPublicSocialLinks } = await import("./social-verify.server");
+    socialLinks = (await readPublicSocialLinks(profile["id"] as string)) ?? [];
+  } catch (error) {
+    console.warn("[public-profile:social-links:skipped]", username, error);
+  }
   return { ...profile, social_links: socialLinks } as Row;
 }
 
