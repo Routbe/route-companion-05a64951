@@ -217,7 +217,9 @@ const HOST_KEYS: [RegExp, string][] = [
   [/(^|\.)behance\.net$/, "behance"],
   [/(^|\.)notion\.(so|site)$/, "notion"],
   [/(^|\.)wikipedia\.org$/, "wikipedia"],
-  [/mastodon|fosstodon|mstdn|eyou\.social/, "mastodon"],
+  [/(^|\.)eyou\.social$/, "eyou"],
+  [/(^|\.)w\.social$|(^|\.)wsocial\./, "wsocial"],
+  [/mastodon|fosstodon|mstdn/, "mastodon"],
 ];
 
 /** Normaliseert een sleutel: `@Handle`, "Ko-Fi", "whatsapp chat" → `kofi`. */
