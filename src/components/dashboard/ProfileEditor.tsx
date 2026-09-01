@@ -123,7 +123,6 @@ import { withAuthTimeout, authFailureMessage } from "@/lib/auth-timeout";
 import { oauthAvatarOf } from "@/lib/oauth-avatar";
 import { BlueskyWizard } from "@/components/dashboard/BlueskyWizard";
 
-
 export type ProfileVariant = "verified" | "alias";
 
 /**
@@ -203,7 +202,9 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
         const started = Date.now();
         const data = await withAuthTimeout(
           loadProfileEditor() as Promise<
-            (AliasProfileDTO & Partial<StudioProfileDTO>) | (StudioProfileDTO & Partial<AliasProfileDTO>) | null
+            | (AliasProfileDTO & Partial<StudioProfileDTO>)
+            | (StudioProfileDTO & Partial<AliasProfileDTO>)
+            | null
           >,
           "studio:getStudioProfile",
           8_000,
@@ -421,7 +422,17 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
    * knoppen in de kopbalk) over alles wat je in de studio bewerkt.
    */
   const historySnapshot = useMemo(
-    () => ({ handle, displayName, tagline, avatarUrl, faviconUrl, theme, cardStyle, prefs, blocks }),
+    () => ({
+      handle,
+      displayName,
+      tagline,
+      avatarUrl,
+      faviconUrl,
+      theme,
+      cardStyle,
+      prefs,
+      blocks,
+    }),
     [handle, displayName, tagline, avatarUrl, faviconUrl, theme, cardStyle, prefs, blocks],
   );
   const applySnapshot = useCallback((s: typeof historySnapshot) => {
@@ -440,9 +451,6 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
     apply: applySnapshot,
     enabled: !loading,
   });
-
-
-
 
   /**
    * Debounced copy of the draft (max. 1 preview re-render per 150ms) so typing
@@ -880,9 +888,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
             </Accordion>
           )}
 
-          {tab === "analytics" && (
-            <VisitorPanel defaultSpace={alias ? "alias" : "all"} />
-          )}
+          {tab === "analytics" && <VisitorPanel defaultSpace={alias ? "alias" : "all"} />}
           {tab === "analytics" && (
             <section className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1088,8 +1094,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                   <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
                     <h2 className="text-lg font-medium">Jouw data &amp; eigen domein</h2>
                     <p className="text-sm text-muted-foreground">
-                      Data-export, verwijdering en je eigen domein staan bij je
-                      accountinstellingen.
+                      Data-export, verwijdering en je eigen domein staan bij je accountinstellingen.
                     </p>
                     <a
                       href="/settings?tab=data"
@@ -1421,7 +1426,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                         )}
                       </div>
                     )}
-                </section>
+                  </section>
                 </AccordionContent>
               </AccordionItem>
 
