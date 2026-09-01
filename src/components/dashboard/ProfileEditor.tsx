@@ -1296,7 +1296,21 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                         symbolen.
                       </p>
                     </div>
+                  </section>
+                </AccordionContent>
+              </AccordionItem>
 
+              <AccordionItem
+                value="badges"
+                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <span className="text-base font-medium">🏅 ROUT Badges &amp; weergave</span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-5">
+                  <VerifiedBadgeCard verified={verified} handle={handle || null} />
+
+                  <section className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5">
                     <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-background/60 p-3">
                       <div className="min-w-0">
                         <p className="text-sm font-medium">Badge tonen</p>
