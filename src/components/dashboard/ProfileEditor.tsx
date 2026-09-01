@@ -1395,16 +1395,40 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                         )}
                       </div>
                     )}
-                  </section>
-                  {/* Steunpagina staat er voor iedereen — free én Pro. */}
+                </section>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Steunpagina staat er voor iedereen — free én Pro. */}
+              <AccordionItem
+                value="support_page"
+                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <span className="text-base font-medium">💛 Steunpagina &amp; donaties</span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-5">
                   <DonationPanel
                     handle={claimed || normalized || null}
                     urlStyle={urlStyle}
                     verified={verified}
                   />
-                  {!verified && <VerificationPanel />}
                 </AccordionContent>
               </AccordionItem>
+
+              {!verified && (
+                <AccordionItem
+                  value="verification"
+                  className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+                >
+                  <AccordionTrigger className="hover:no-underline">
+                    <span className="text-base font-medium">🛡️ Identiteitsverificatie</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 pb-5">
+                    <VerificationPanel />
+                  </AccordionContent>
+                </AccordionItem>
+              )}
             </Accordion>
           )}
 
