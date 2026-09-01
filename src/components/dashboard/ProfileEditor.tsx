@@ -123,7 +123,6 @@ import { withAuthTimeout, authFailureMessage } from "@/lib/auth-timeout";
 import { oauthAvatarOf } from "@/lib/oauth-avatar";
 import { BlueskyWizard } from "@/components/dashboard/BlueskyWizard";
 
-
 export type ProfileVariant = "verified" | "alias";
 
 /**
@@ -203,7 +202,9 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
         const started = Date.now();
         const data = await withAuthTimeout(
           loadProfileEditor() as Promise<
-            (AliasProfileDTO & Partial<StudioProfileDTO>) | (StudioProfileDTO & Partial<AliasProfileDTO>) | null
+            | (AliasProfileDTO & Partial<StudioProfileDTO>)
+            | (StudioProfileDTO & Partial<AliasProfileDTO>)
+            | null
           >,
           "studio:getStudioProfile",
           8_000,
@@ -421,7 +422,17 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
    * knoppen in de kopbalk) over alles wat je in de studio bewerkt.
    */
   const historySnapshot = useMemo(
-    () => ({ handle, displayName, tagline, avatarUrl, faviconUrl, theme, cardStyle, prefs, blocks }),
+    () => ({
+      handle,
+      displayName,
+      tagline,
+      avatarUrl,
+      faviconUrl,
+      theme,
+      cardStyle,
+      prefs,
+      blocks,
+    }),
     [handle, displayName, tagline, avatarUrl, faviconUrl, theme, cardStyle, prefs, blocks],
   );
   const applySnapshot = useCallback((s: typeof historySnapshot) => {
@@ -440,9 +451,6 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
     apply: applySnapshot,
     enabled: !loading,
   });
-
-
-
 
   /**
    * Debounced copy of the draft (max. 1 preview re-render per 150ms) so typing
@@ -880,9 +888,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
             </Accordion>
           )}
 
-          {tab === "analytics" && (
-            <VisitorPanel defaultSpace={alias ? "alias" : "all"} />
-          )}
+          {tab === "analytics" && <VisitorPanel defaultSpace={alias ? "alias" : "all"} />}
           {tab === "analytics" && (
             <section className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1054,35 +1060,48 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
               onValueChange={(v) => setSettingsSection(v || undefined)}
             >
               <AccordionItem
-                value="account_billing"
+                value="billing"
                 className="rounded-2xl border border-border bg-card px-4 sm:px-5"
               >
                 <AccordionTrigger className="hover:no-underline">
-                  <span className="text-base font-medium">💳 Account, Data &amp; Facturatie</span>
+                  <span className="text-base font-medium">💳 Betalingen &amp; facturen</span>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4 pb-5">
                   <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
-                    <h2 className="text-lg font-medium">Betalingen, data &amp; domein</h2>
+                    <h2 className="text-lg font-medium">Betaalmethodes &amp; facturatie</h2>
                     <p className="text-sm text-muted-foreground">
-                      Facturen, betaalmethodes, data-export en je eigen domein staan nu bij je
+                      Je facturen, abonnement en betaalmethodes beheer je bij je
                       accountinstellingen.
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      <a
-                        href="/settings?tab=payments"
-                        className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-                      >
-                        Betalingen &amp; facturen →
-                      </a>
-                      <a
-                        href="/settings?tab=data"
-                        className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
-                      >
-                        Data &amp; domein →
-                      </a>
-                    </div>
-                    <div className="h-px bg-border" />
-                    <VerifiedBadgeCard verified={verified} handle={handle || null} />
+                    <a
+                      href="/settings?tab=payments"
+                      className="inline-block rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                    >
+                      Betalingen &amp; facturen →
+                    </a>
+                  </section>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem
+                value="data_domain"
+                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <span className="text-base font-medium">📦 Data, export &amp; domein</span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-5">
+                  <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+                    <h2 className="text-lg font-medium">Jouw data &amp; eigen domein</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Data-export, verwijdering en je eigen domein staan bij je accountinstellingen.
+                    </p>
+                    <a
+                      href="/settings?tab=data"
+                      className="inline-block rounded-lg border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                    >
+                      Data &amp; domein →
+                    </a>
                   </section>
                 </AccordionContent>
               </AccordionItem>
@@ -1111,9 +1130,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                 className="rounded-2xl border border-border bg-card px-4 sm:px-5"
               >
                 <AccordionTrigger className="hover:no-underline">
-                  <span className="text-base font-medium">
-                    🛡️ Identiteitsverificatie &amp; ROUT Badges
-                  </span>
+                  <span className="text-base font-medium">🔗 Handle, URL &amp; identiteit</span>
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4 pb-5">
                   <section className="rounded-2xl border border-border bg-card p-4 sm:p-5">
@@ -1296,7 +1313,21 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                         symbolen.
                       </p>
                     </div>
+                  </section>
+                </AccordionContent>
+              </AccordionItem>
 
+              <AccordionItem
+                value="badges"
+                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <span className="text-base font-medium">🏅 ROUT Badges &amp; weergave</span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-5">
+                  <VerifiedBadgeCard verified={verified} handle={handle || null} />
+
+                  <section className="space-y-4 rounded-2xl border border-border bg-card p-4 sm:p-5">
                     <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-background/60 p-3">
                       <div className="min-w-0">
                         <p className="text-sm font-medium">Badge tonen</p>
@@ -1396,15 +1427,39 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                       </div>
                     )}
                   </section>
-                  {/* Steunpagina staat er voor iedereen — free én Pro. */}
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Steunpagina staat er voor iedereen — free én Pro. */}
+              <AccordionItem
+                value="support_page"
+                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+              >
+                <AccordionTrigger className="hover:no-underline">
+                  <span className="text-base font-medium">💛 Steunpagina &amp; donaties</span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pb-5">
                   <DonationPanel
                     handle={claimed || normalized || null}
                     urlStyle={urlStyle}
                     verified={verified}
                   />
-                  {!verified && <VerificationPanel />}
                 </AccordionContent>
               </AccordionItem>
+
+              {!verified && (
+                <AccordionItem
+                  value="verification"
+                  className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+                >
+                  <AccordionTrigger className="hover:no-underline">
+                    <span className="text-base font-medium">🛡️ Identiteitsverificatie</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 pb-5">
+                    <VerificationPanel />
+                  </AccordionContent>
+                </AccordionItem>
+              )}
             </Accordion>
           )}
 
