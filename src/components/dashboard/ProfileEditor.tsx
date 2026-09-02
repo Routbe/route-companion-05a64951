@@ -5,6 +5,8 @@ import { SocialPlatformIcon } from "@/lib/social-icons";
 import { ProfileBasicInfoAccordion } from "@/components/studio/ProfileBasicInfoAccordion";
 import { ProfileHeaderPreview } from "@/components/dashboard/editor/ProfileHeaderPreview";
 import { ProfileContentAccordion } from "@/components/studio/ProfileContentAccordion";
+import { ManualInvoicePanel } from "@/components/dashboard/ManualInvoicePanel";
+import { BillingHistoryPanel } from "@/components/dashboard/BillingHistoryPanel";
 import { ProfileThemePicker } from "@/components/dashboard/editor/ProfileThemePicker";
 import { TABS, QUICK_CREATE, RANGE_OPTIONS } from "@/lib/profile-editor-utils";
 import type { QuickCreateOption, StudioTab } from "@/types/profile-editor";
@@ -1073,6 +1075,9 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                       Betalingen &amp; facturen →
                     </a>
                   </section>
+
+                  <ManualInvoicePanel />
+                  <BillingHistoryPanel />
                 </AccordionContent>
               </AccordionItem>
 
