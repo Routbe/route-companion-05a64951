@@ -548,7 +548,9 @@ export function VerificationPanel() {
     };
   }, [user, reloadKey, loadMemberState]);
 
-  const active = Boolean(state?.isEarlyBeliever || state?.isPaid);
+  // Geverifieerde leden hoeven de aankoopkaart nooit meer te zien; zij krijgen
+  // een verwijzing naar het donatieportaal om alsnog bij te dragen.
+  const active = Boolean(state?.isEarlyBeliever || state?.isPaid || state?.verified);
 
   /**
    * Asynchrone betalingen (Bancontact/iDEAL-redirect, QR, overschrijving)
@@ -936,6 +938,22 @@ export function VerificationPanel() {
           );
         })}
       </ul>
+
+      {active && (
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-sm font-medium">Je verificatie is actief</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Wil je ROUT alsnog steunen? Dat kan altijd via het donatieportaal — vrijblijvend en
+            zonder invloed op je verificatie.
+          </p>
+          <a
+            href="/donate"
+            className="mt-3 inline-flex h-9 items-center rounded-xl bg-foreground px-3 text-xs font-medium text-background transition-opacity hover:opacity-90"
+          >
+            Doneren via het portaal
+          </a>
+        </div>
+      )}
 
       {!active && (
         <div className="overflow-hidden rounded-xl border border-border">
