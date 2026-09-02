@@ -97,6 +97,13 @@ export function ProfileView({
       b.kind === "booking_request" ||
       b.kind === "spacer",
   );
+  /** Accent-animatie op de gekozen hoofdlink (glow, pulse of shimmer). */
+  const ctaClass = (blockId: string) => {
+    if (prefs.ctaBlockId !== blockId || prefs.ctaEffect === "none") return "";
+    if (prefs.ctaEffect === "pulse") return "animate-pulse";
+    if (prefs.ctaEffect === "shimmer") return "animate-[pulse_2.4s_ease-in-out_infinite] brightness-110";
+    return "shadow-[0_0_24px_-6px_currentColor] ring-1 ring-current";
+  };
   const fonts = fontPairingOf(prefs.fontPairing);
   const buttonStyle = designButtonStyle(prefs, t) ?? blockButtonStyle(profile.card_style, t);
   /** Eigen canvas- en patroonkleuren overschrijven het thema, indien gekozen. */
@@ -489,7 +496,10 @@ export function ProfileView({
                 href={blockHref(b)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex min-h-12 w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-opacity hover:opacity-80"
+                className={cn(
+                  "flex min-h-12 w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-opacity hover:opacity-80",
+                  ctaClass(b.id),
+                )}
                 style={buttonStyle}
               >
                 {b.thumbnailUrl ? (
