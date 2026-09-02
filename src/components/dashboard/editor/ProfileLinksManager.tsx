@@ -1,5 +1,14 @@
 import { type Dispatch, type SetStateAction, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  GripVertical,
+  ImagePlus,
+  Pin,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -13,6 +22,7 @@ import {
   blockHref,
   brandOf,
   isPromoBlock,
+  sanitizeUrl,
   PROMO_BADGE_PRESETS,
   PROMO_COPY_PRESETS,
   type ProfileBlock,
@@ -56,6 +66,36 @@ export function ProfileLinksManager({
 
   const patch = (id: string, next: Partial<ProfileBlock>) =>
     onBlocksChange((b) => b.map((x) => (x.id === id ? { ...x, ...next } : x)));
+
+  /** Zet het blok bovenaan (of maakt het weer los). */
+  const togglePin = (id: string) =>
+    onBlocksChange((b) => {
+      const target = b.find((x) => x.id === id);
+      if (!target) return b;
+      const next = b.map((x) => (x.id === id ? { ...x, pinned: !target.pinned } : x));
+      if (target.pinned) return next;
+      const moved = next.find((x) => x.id === id)!;
+      return [moved, ...next.filter((x) => x.id !== id)];
+    });
+
+  /** Kleine miniatuur (max ~300 KB) als data-URL bij het blok bewaren. */
+  const pickThumbnail = (id: string) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (file.size > 300_000) {
+        toast.error("Kies een afbeelding onder 300 KB.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => patch(id, { thumbnailUrl: String(reader.result) });
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
 
   /** Every reorder gets a floating Undo toast, one click back. */
   const reorderWithUndo = (mutate: (list: ProfileBlock[]) => ProfileBlock[]) => {
@@ -191,6 +231,18 @@ export function ProfileLinksManager({
                     {b.value ? blockHref(b) : "Not filled in yet"}
                   </span>
                 </button>
+                <button
+                  type="button"
+                  aria-label={b.pinned ? "Losmaken" : "Vastzetten bovenaan"}
+                  aria-pressed={Boolean(b.pinned)}
+                  onClick={() => togglePin(b.id)}
+                  className={cn(
+                    "shrink-0 rounded-lg p-1 transition-colors hover:bg-muted",
+                    b.pinned ? "text-amber-500" : "text-muted-foreground",
+                  )}
+                >
+                  <Pin className="h-4 w-4" />
+                </button>
                 <Switch
                   checked={!b.hidden}
                   onCheckedChange={(on) => patch(b.id, { hidden: !on })}
@@ -284,6 +336,7 @@ export function ProfileLinksManager({
                         value={b.value}
                         maxLength={400}
                         onChange={(e) => patch(b.id, { value: e.target.value })}
+                        onBlur={(e) => patch(b.id, { value: sanitizeUrl(e.target.value) })}
                       />
                       <p className="text-[11px] text-muted-foreground">
                         {hint.prefix && (
@@ -342,6 +395,66 @@ export function ProfileLinksManager({
                       </div>
                     </div>
                   )}
+                  <div className="space-y-2 rounded-xl border border-border/60 bg-background p-3">
+                    <p className="text-[11px] font-medium text-foreground">Planning & weergave</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <label className="space-y-1 text-[10px] text-muted-foreground">
+                        Zichtbaar vanaf
+                        <Input
+                          type="datetime-local"
+                          className="input-field h-9 rounded-xl"
+                          value={(b.startsAt ?? "").slice(0, 16)}
+                          onChange={(e) =>
+                            patch(b.id, {
+                              startsAt: e.target.value
+                                ? new Date(e.target.value).toISOString()
+                                : "",
+                            })
+                          }
+                        />
+                      </label>
+                      <label className="space-y-1 text-[10px] text-muted-foreground">
+                        Zichtbaar tot
+                        <Input
+                          type="datetime-local"
+                          className="input-field h-9 rounded-xl"
+                          value={(b.expiresAt ?? "").slice(0, 16)}
+                          onChange={(e) =>
+                            patch(b.id, {
+                              expiresAt: e.target.value
+                                ? new Date(e.target.value).toISOString()
+                                : "",
+                            })
+                          }
+                        />
+                      </label>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {b.thumbnailUrl && (
+                        <img
+                          src={b.thumbnailUrl}
+                          alt=""
+                          className="h-8 w-8 rounded-md border border-border object-cover"
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => pickThumbnail(b.id)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-[11px] hover:bg-muted"
+                      >
+                        <ImagePlus className="h-3.5 w-3.5" /> Eigen miniatuur
+                      </button>
+                      {b.thumbnailUrl && (
+                        <button
+                          type="button"
+                          onClick={() => patch(b.id, { thumbnailUrl: "" })}
+                          className="rounded-lg px-2 py-1 text-[11px] text-muted-foreground hover:text-destructive"
+                        >
+                          Verwijderen
+                        </button>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex items-center gap-1">
                     <button
                       type="button"

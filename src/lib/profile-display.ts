@@ -28,6 +28,30 @@ export type BackgroundStyle =
   | "stars"
   | "spotlight";
 export type Typography = "sans" | "serif" | "mono";
+/** Avatarvorm op het publieke profiel. */
+export type AvatarShape = "circle" | "rounded" | "hexagon";
+
+export const AVATAR_SHAPES: { id: AvatarShape; label: string }[] = [
+  { id: "circle", label: "Cirkel" },
+  { id: "rounded", label: "Vierkant" },
+  { id: "hexagon", label: "Hexagon" },
+];
+
+/** CSS-klasse + clip-path voor de gekozen avatarvorm. */
+export function avatarShapeStyle(shape: AvatarShape): {
+  className: string;
+  style?: Record<string, string>;
+} {
+  if (shape === "rounded") return { className: "rounded-2xl" };
+  if (shape === "hexagon")
+    return {
+      className: "rounded-none",
+      style: {
+        clipPath: "polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
+      },
+    };
+  return { className: "rounded-full" };
+}
 /** 24 avatarkaders — definities leven in `@/lib/avatar-frames`. */
 export type { AvatarFrame } from "./avatar-frames";
 export type { AvatarDecoration, PresenceStatus } from "./avatar-decorations";
@@ -45,7 +69,7 @@ import {
   type PresenceStatus,
 } from "./avatar-decorations";
 import { normalizeVisitEffect, type VisitEffect } from "./visit-effects";
-import { normalizeFavorites, type ProfileFavorite } from "./favorites";
+import { FAVORITE_LAYOUTS, normalizeFavorites, type FavoriteLayout, type ProfileFavorite } from "./favorites";
 import {
   DEFAULT_DESIGN_PREFS,
   normalizeDesignPrefs,
@@ -54,7 +78,7 @@ import {
 /** Design Studio (presets, wallpaper, knoppen, typografie, footer). */
 export * from "./profile-design";
 /** Favorieten (film, serie, boek, …) — definities leven in `@/lib/favorites`. */
-export type { ProfileFavorite, FavoriteKind } from "./favorites";
+export type { ProfileFavorite, FavoriteKind, FavoriteLayout } from "./favorites";
 export {
   FAVORITE_KINDS,
   FAVORITE_KIND_LABEL,
@@ -145,6 +169,14 @@ export interface ProfileDisplayPrefs {
   visitEffect: VisitEffect;
   /** Favoriete films, series, boeken … met (eigen of opgehaalde) afbeelding. */
   favorites: ProfileFavorite[];
+  /** Vorm van de avatar op het publieke profiel. */
+  avatarShape: AvatarShape;
+  /** Korte locatie-/herkomstbadge, bv. "📍 Brussel, België". */
+  locationBadge: string | null;
+  /** Toont de locatiebadge op het publieke profiel. */
+  locationVisible: boolean;
+  /** Indeling van de favorietenstrook. */
+  favoritesLayout: FavoriteLayout;
 }
 
 /** Alle designvelden zitten in dezelfde JSON-blob. */
@@ -186,6 +218,10 @@ export const DEFAULT_DISPLAY_PREFS: ProfileDisplayPrefs = {
   vcardLabel: null,
   visitEffect: "none",
   favorites: [],
+  avatarShape: "circle",
+  locationBadge: null,
+  locationVisible: true,
+  favoritesLayout: "grid",
   ...DEFAULT_DESIGN_PREFS,
 };
 
@@ -356,6 +392,14 @@ export function parseDisplayPrefs(raw: unknown): ProfileDisplayPrefs {
     vcardLabel: textOrNull(r["vcardLabel"], 40),
     visitEffect: normalizeVisitEffect(r["visitEffect"]),
     favorites: normalizeFavorites(r["favorites"]),
+    avatarShape: oneOf(
+      r["avatarShape"],
+      AVATAR_SHAPES.map((o) => o.id),
+      "circle",
+    ),
+    locationBadge: textOrNull(r["locationBadge"], 60),
+    locationVisible: r["locationVisible"] === undefined ? true : Boolean(r["locationVisible"]),
+    favoritesLayout: oneOf(r["favoritesLayout"], [...FAVORITE_LAYOUTS], "grid"),
     ...normalizeDesignPrefs(r),
   };
 }

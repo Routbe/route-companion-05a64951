@@ -2,9 +2,9 @@ import { QrCode } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { SocialPlatformIcon } from "@/lib/social-icons";
-import { ProfileBasicInfoForm } from "@/components/dashboard/editor/ProfileBasicInfoForm";
+import { ProfileBasicInfoAccordion } from "@/components/studio/ProfileBasicInfoAccordion";
 import { ProfileHeaderPreview } from "@/components/dashboard/editor/ProfileHeaderPreview";
-import { ProfileLinksManager } from "@/components/dashboard/editor/ProfileLinksManager";
+import { ProfileContentAccordion } from "@/components/studio/ProfileContentAccordion";
 import { ProfileThemePicker } from "@/components/dashboard/editor/ProfileThemePicker";
 import { TABS, QUICK_CREATE, RANGE_OPTIONS } from "@/lib/profile-editor-utils";
 import type { QuickCreateOption, StudioTab } from "@/types/profile-editor";
@@ -476,7 +476,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
 
   useEffect(() => {
     if (!dirty || saving || !handleOk) return;
-    const id = setTimeout(() => void save(true), 1200);
+    const id = setTimeout(() => void save(true), 500);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty, draft, handleOk]);
@@ -754,7 +754,7 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
         <div className="min-w-0 space-y-6 lg:col-span-7">
           {tab === "links" && (
             <Accordion type="single" collapsible className="space-y-3">
-              <ProfileBasicInfoForm
+              <ProfileBasicInfoAccordion
                 displayName={displayName}
                 onDisplayNameChange={setDisplayName}
                 tagline={tagline}
@@ -764,29 +764,23 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                 normalized={normalized}
                 urlStyle={urlStyle}
                 onEditHandle={() => setTab("settings")}
+                prefs={prefs}
+                setPref={setPref}
+                blocks={blocks}
+                onBlocksChange={setBlocks}
+                saving={saving}
+                savedAt={savedAt}
               />
 
-              <AccordionItem
-                value="components_list"
-                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
+              <ProfileContentAccordion
+                blocks={blocks}
+                onBlocksChange={setBlocks}
+                openBlock={openBlock}
+                onOpenBlockChange={setOpenBlock}
+                onOpenAddDrawer={() => setDrawer(true)}
+                onQuickCreate={quickCreate}
+                onAddKind={(kind) => addBlock(kind)}
               >
-                <AccordionTrigger className="hover:no-underline">
-                  <span className="flex flex-1 items-center justify-between gap-3 pr-2">
-                    <span className="text-base font-medium">🔗 Links &amp; Inhoudscomponenten</span>
-                    <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
-                      {blocks.filter((b) => !b.hidden).length} zichtbaar
-                    </span>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="space-y-4 pb-5">
-                  <ProfileLinksManager
-                    blocks={blocks}
-                    onBlocksChange={setBlocks}
-                    openBlock={openBlock}
-                    onOpenBlockChange={setOpenBlock}
-                    onOpenAddDrawer={() => setDrawer(true)}
-                    onQuickCreate={quickCreate}
-                  />
                   <section className="space-y-3">
                     <h2 className="px-1 text-lg font-medium">Referrals &amp; Rewards</h2>
                     <p className="px-1 text-sm text-muted-foreground">
@@ -824,10 +818,9 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                     </a>
                   </section>
 
-                  <BadgesPanel />
-                  <BadgeActivityPanel />
-                </AccordionContent>
-              </AccordionItem>
+                <BadgesPanel />
+                <BadgeActivityPanel />
+              </ProfileContentAccordion>
 
               {/* Favorieten horen bij je links: film, serie, boek, muziek … */}
               <AccordionItem

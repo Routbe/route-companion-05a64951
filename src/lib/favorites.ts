@@ -38,7 +38,52 @@ export interface ProfileFavorite {
   imageUrl: string | null;
   /** Korte toelichting van het lid. */
   note: string | null;
+  /** Badge-overlay, bv. "🔥 Populairst". */
+  badge?: string | null;
+  /** Kleurpreset van de badge. */
+  badgeColor?: FavoriteBadgeColor;
+  /** Subtiele animerende gloedrand rond de kaart. */
+  glow?: boolean;
 }
+
+/** Indelingen van de favorietenstrook op het publieke profiel. */
+export const FAVORITE_LAYOUTS = ["grid", "carousel", "hero"] as const;
+export type FavoriteLayout = (typeof FAVORITE_LAYOUTS)[number];
+
+export const FAVORITE_LAYOUT_LABEL: Record<FavoriteLayout, string> = {
+  grid: "2x2 raster",
+  carousel: "Horizontale carrousel",
+  hero: "Hero-kaart",
+};
+
+export const FAVORITE_BADGE_COLORS = [
+  "gold",
+  "cyan",
+  "emerald",
+  "bordeaux",
+  "black",
+] as const;
+export type FavoriteBadgeColor = (typeof FAVORITE_BADGE_COLORS)[number];
+
+export const FAVORITE_BADGE_LABEL: Record<FavoriteBadgeColor, string> = {
+  gold: "Goud",
+  cyan: "Neon cyaan",
+  emerald: "Smaragd",
+  bordeaux: "Bordeaux",
+  black: "Minimalistisch zwart",
+};
+
+/** Achtergrond/tekstkleur per badgepreset (inline, thema-onafhankelijk). */
+export const FAVORITE_BADGE_STYLE: Record<FavoriteBadgeColor, { bg: string; fg: string }> = {
+  gold: { bg: "#d4a017", fg: "#1a1200" },
+  cyan: { bg: "#22d3ee", fg: "#052a30" },
+  emerald: { bg: "#10b981", fg: "#03231a" },
+  bordeaux: { bg: "#7f1d3a", fg: "#ffeef4" },
+  black: { bg: "#111111", fg: "#f5f5f5" },
+};
+
+/** Voorgestelde badgeteksten in de studio. */
+export const FAVORITE_BADGE_PRESETS = ["🔥 Populairst", "✨ Nieuw project", "⭐ Aanrader"];
 
 const httpsUrl = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
@@ -75,6 +120,11 @@ export function normalizeFavorites(raw: unknown): ProfileFavorite[] {
       url: httpsUrl(r["url"]),
       imageUrl: httpsUrl(r["imageUrl"]),
       note: text(r["note"], 120),
+      badge: text(r["badge"], 24),
+      badgeColor: FAVORITE_BADGE_COLORS.includes(r["badgeColor"] as FavoriteBadgeColor)
+        ? (r["badgeColor"] as FavoriteBadgeColor)
+        : "gold",
+      glow: Boolean(r["glow"]),
     });
     if (out.length >= MAX_FAVORITES) break;
   }

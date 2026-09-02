@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { BadgeCheck, Mail, UserPlus, Users } from "lucide-react";
-import { blockHref, isPromoBlock, isWidgetBlock, themeOf, type ProfileRecord } from "@/lib/profile";
+import {
+  blockHref,
+  isPromoBlock,
+  isWidgetBlock,
+  scheduledBlocks,
+  themeOf,
+  type ProfileRecord,
+} from "@/lib/profile";
 import {
   BookingBlock,
   NewsletterBlock,
@@ -48,6 +55,7 @@ import {
   wallpaperImageLayerStyle,
   wallpaperOverlayStyle,
   wallpaperStyle,
+  avatarShapeStyle,
 } from "@/lib/profile-display";
 import { runVisitEffect } from "@/lib/visit-effects";
 import { AvatarFrameWrapper } from "@/components/profile/AvatarFrameWrapper";
@@ -82,13 +90,12 @@ export function ProfileView({
   const { t: tr, locale } = useI18n();
   const t = themeOf(profile.theme);
   const prefs = parseDisplayPrefs(profile.display_prefs);
-  const blocks = profile.blocks.filter(
+  const blocks = scheduledBlocks(profile.blocks).filter(
     (b) =>
-      !b.hidden &&
-      (b.value.trim() !== "" ||
-        b.kind === "newsletter" ||
-        b.kind === "booking_request" ||
-        b.kind === "spacer"),
+      b.value.trim() !== "" ||
+      b.kind === "newsletter" ||
+      b.kind === "booking_request" ||
+      b.kind === "spacer",
   );
   const fonts = fontPairingOf(prefs.fontPairing);
   const buttonStyle = designButtonStyle(prefs, t) ?? blockButtonStyle(profile.card_style, t);
@@ -104,6 +111,7 @@ export function ProfileView({
   const overlay = wallpaperOverlayStyle(prefs);
   const banner = bannerStyleOf(prefs, t);
   const nameStyle = nameAccentStyle(prefs.nameAccent, t);
+  const avatarShape = avatarShapeStyle(prefs.avatarShape);
 
   // Het blauwe vinkje hoort uitsluitend bij het geverifieerde account op de
   // schone namespace (`rout.be/<handle>`). De aliasruimte (`rout.be/u/…`) van
@@ -217,14 +225,18 @@ export function ProfileView({
             <img
               src={profile.avatar_url}
               alt={profile.display_name || `@${profile.username}`}
-              className="h-20 w-20 rounded-full object-cover"
-              style={{ border: `1px solid ${t.border}` }}
+              className={`h-20 w-20 object-cover ${avatarShape.className}`}
+              style={{ border: `1px solid ${t.border}`, ...(avatarShape.style ?? {}) }}
               loading="lazy"
             />
           ) : (
             <div
-              className="flex h-20 w-20 items-center justify-center rounded-full text-xl font-medium"
-              style={{ background: t.card, border: `1px solid ${t.border}` }}
+              className={`flex h-20 w-20 items-center justify-center text-xl font-medium ${avatarShape.className}`}
+              style={{
+                background: t.card,
+                border: `1px solid ${t.border}`,
+                ...(avatarShape.style ?? {}),
+              }}
             >
               {initialsFrom(profile.display_name || profile.username)}
             </div>
@@ -286,6 +298,14 @@ export function ProfileView({
         >
           {free ? `rout.be/u/${profile.username}` : `rout.be/${profile.username}`}
         </a>
+        {prefs.locationVisible && prefs.locationBadge && (
+          <span
+            className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-medium"
+            style={{ border: `1px solid ${t.border}`, color: t.muted }}
+          >
+            {prefs.locationBadge}
+          </span>
+        )}
         {prefs.statusLine && (
           <p className="mt-1 text-center text-xs font-medium" style={{ color: t.text }}>
             {prefs.statusLine}
@@ -472,10 +492,19 @@ export function ProfileView({
                 className="flex min-h-12 w-full items-center gap-3 px-4 py-3 text-sm font-medium transition-opacity hover:opacity-80"
                 style={buttonStyle}
               >
-                <SocialPlatformIcon
-                  source={blockHref(b) || b.kind}
-                  className="h-4 w-4 text-current"
-                />
+                {b.thumbnailUrl ? (
+                  <img
+                    src={b.thumbnailUrl}
+                    alt=""
+                    className="h-6 w-6 shrink-0 rounded-md object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <SocialPlatformIcon
+                    source={blockHref(b) || b.kind}
+                    className="h-4 w-4 text-current"
+                  />
+                )}
                 <span className="min-w-0 flex-1 truncate text-center">{b.label}</span>
                 <span className="h-4 w-4 shrink-0" aria-hidden />
               </a>

@@ -17,6 +17,40 @@ export interface ProfileBlock {
   badge?: string;
   /** Promo/featured: ISO-datum waarop de actie afloopt (aftelklok). */
   expiresAt?: string;
+  /** Planning: ISO-datum vanaf wanneer het blok publiek zichtbaar wordt. */
+  startsAt?: string;
+  /** Eigen miniatuur (data-URL of https) in plaats van het merkicoon. */
+  thumbnailUrl?: string;
+  /** Vastgezet: verschijnt bovenaan de publieke lijst. */
+  pinned?: boolean;
+}
+
+/**
+ * Publieke volgorde en zichtbaarheid van blokken.
+ *
+ * Verborgen blokken vallen weg, geplande blokken alleen binnen hun venster
+ * (`startsAt` … `expiresAt`) en vastgezette blokken staan altijd bovenaan.
+ */
+export function scheduledBlocks(blocks: ProfileBlock[], now: number = Date.now()): ProfileBlock[] {
+  const inWindow = (b: ProfileBlock) => {
+    const start = b.startsAt ? Date.parse(b.startsAt) : NaN;
+    const end = b.expiresAt ? Date.parse(b.expiresAt) : NaN;
+    if (Number.isFinite(start) && now < start) return false;
+    if (Number.isFinite(end) && now > end) return false;
+    return true;
+  };
+  const visible = blocks.filter((b) => !b.hidden && inWindow(b));
+  return [...visible.filter((b) => b.pinned), ...visible.filter((b) => !b.pinned)];
+}
+
+/** Zet een ingetypt webadres om naar een volledige https-URL. */
+export function sanitizeUrl(raw: string): string {
+  const value = raw.trim();
+  if (!value) return "";
+  if (/^(https?:|mailto:|tel:|bitcoin:|lightning:)/i.test(value)) return value;
+  if (value.startsWith("//")) return `https:${value}`;
+  if (/^[\w.-]+\.[a-z]{2,}(\/|$|\?)/i.test(value)) return `https://${value}`;
+  return value;
 }
 
 /** Kant-en-klare badges voor het promo/featured-component. */
