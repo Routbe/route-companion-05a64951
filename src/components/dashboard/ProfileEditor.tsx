@@ -85,7 +85,7 @@ import {
   type ProfileBlock,
   type ProfileRecord,
 } from "@/lib/profile";
-import { ConversionCoach } from "@/components/dashboard/ConversionCoach";
+import { ConversionCoachAccordion } from "@/components/studio/ConversionCoachAccordion";
 import {
   Accordion,
   AccordionContent,
@@ -830,19 +830,15 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                 onLayoutChange={(next) => setPref("favoritesLayout", next)}
               />
 
-              <AccordionItem
-                value="conversion_tips"
-                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
-              >
-                <AccordionTrigger className="hover:no-underline">
-                  <span className="text-base font-medium">
-                    💡 Conversie Coach &amp; Optimalisatie
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="space-y-4 pb-5">
-                  <ConversionCoach blocks={blocks} />
-                </AccordionContent>
-              </AccordionItem>
+              <ConversionCoachAccordion
+                blocks={blocks}
+                avatarUrl={avatarUrl}
+                bio={tagline}
+                displayName={displayName}
+                prefs={prefs}
+                onPrefChange={setPref}
+                onAddKind={(kind) => addBlock(kind)}
+              />
             </Accordion>
           )}
 
