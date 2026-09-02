@@ -1,13 +1,29 @@
-import { FAVORITE_KIND_EMOJI, FAVORITE_KIND_LABEL, type ProfileFavorite } from "@/lib/favorites";
+import {
+  FAVORITE_BADGE_STYLE,
+  FAVORITE_KIND_EMOJI,
+  FAVORITE_KIND_LABEL,
+  type FavoriteLayout,
+  type ProfileFavorite,
+} from "@/lib/favorites";
+import { cn } from "@/lib/utils";
 
 interface Props {
   favorites: ProfileFavorite[];
   theme: { bg: string; text: string; muted: string; border: string };
+  /** Indeling: raster, carrousel of hero-kaart. */
+  layout?: FavoriteLayout;
 }
 
 /** Publieke strook met de favoriete films, series en boeken van een lid. */
-export function FavoritesShowcase({ favorites, theme: t }: Props) {
+export function FavoritesShowcase({ favorites, theme: t, layout = "grid" }: Props) {
   if (favorites.length === 0) return null;
+
+  const listClass =
+    layout === "carousel"
+      ? "flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1"
+      : layout === "hero"
+        ? "grid grid-cols-1 gap-2 sm:grid-cols-2"
+        : "grid grid-cols-2 gap-2 sm:grid-cols-3";
 
   return (
     <section className="mt-6 w-full" aria-label="Favorieten">
@@ -17,11 +33,19 @@ export function FavoritesShowcase({ favorites, theme: t }: Props) {
       >
         Favorieten
       </h2>
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {favorites.map((fav) => {
+      <ul className={listClass}>
+        {favorites.map((fav, index) => {
+          const hero = layout === "hero" && index === 0;
+          const badgeStyle = FAVORITE_BADGE_STYLE[fav.badgeColor ?? "gold"];
           const inner = (
             <>
-              <div className="aspect-[2/3] w-full overflow-hidden" style={{ background: t.border }}>
+              <div
+                className={cn(
+                  "relative w-full overflow-hidden",
+                  hero ? "aspect-[16/9]" : "aspect-[2/3]",
+                )}
+                style={{ background: t.border }}
+              >
                 {fav.imageUrl ? (
                   <img
                     src={fav.imageUrl}
@@ -38,6 +62,14 @@ export function FavoritesShowcase({ favorites, theme: t }: Props) {
                     {FAVORITE_KIND_EMOJI[fav.kind]}
                   </div>
                 )}
+                {fav.badge && (
+                  <span
+                    className="absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                    style={{ background: badgeStyle.bg, color: badgeStyle.fg }}
+                  >
+                    {fav.badge}
+                  </span>
+                )}
               </div>
               <div className="p-2">
                 <p className="truncate text-xs font-medium" style={{ color: t.text }}>
@@ -51,20 +83,34 @@ export function FavoritesShowcase({ favorites, theme: t }: Props) {
             </>
           );
 
+          const frameClass = cn(
+            "overflow-hidden",
+            fav.glow && "animate-pulse shadow-[0_0_0_1px_currentColor,0_0_18px_-4px_currentColor]",
+          );
+
           return (
-            <li key={fav.id}>
+            <li
+              key={fav.id}
+              className={cn(
+                layout === "carousel" && "w-32 shrink-0 snap-start",
+                hero && "sm:col-span-2",
+              )}
+            >
               {fav.url ? (
                 <a
                   href={fav.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block overflow-hidden transition-opacity hover:opacity-80"
-                  style={{ border: `1px solid ${t.border}` }}
+                  className={cn("block transition-opacity hover:opacity-80", frameClass)}
+                  style={{ border: `1px solid ${t.border}`, color: badgeStyle.bg }}
                 >
                   {inner}
                 </a>
               ) : (
-                <div className="overflow-hidden" style={{ border: `1px solid ${t.border}` }}>
+                <div
+                  className={frameClass}
+                  style={{ border: `1px solid ${t.border}`, color: badgeStyle.bg }}
+                >
                   {inner}
                 </div>
               )}
