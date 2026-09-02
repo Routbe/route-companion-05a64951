@@ -818,8 +818,25 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
                     </a>
                   </section>
 
-                <BadgesPanel />
-                <BadgeActivityPanel />
+                {/* 🏅 Badges: eigen map binnen Links & componenten, met schakelaar. */}
+                <section className="space-y-3 rounded-2xl border border-border bg-card p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <h2 className="text-lg font-medium">🏅 ROUT Badges</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Je badges verschijnen automatisch onder je profielkop. Zet ze hier uit als
+                        je liever een kale pagina hebt.
+                      </p>
+                    </div>
+                    <Switch
+                      aria-label="Badges tonen op je profiel"
+                      checked={prefs.badgeShowcaseVisible}
+                      onCheckedChange={(v) => setPref("badgeShowcaseVisible", v)}
+                    />
+                  </div>
+                  <BadgesPanel />
+                  <BadgeActivityPanel />
+                </section>
               </ProfileContentAccordion>
 
               {/* Favorieten horen bij je links: film, serie, boek, muziek … */}
