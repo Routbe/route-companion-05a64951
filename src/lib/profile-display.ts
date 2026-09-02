@@ -177,6 +177,10 @@ export interface ProfileDisplayPrefs {
   locationVisible: boolean;
   /** Indeling van de favorietenstrook. */
   favoritesLayout: FavoriteLayout;
+  /** Id van de link die extra aandacht krijgt. */
+  ctaBlockId: string | null;
+  /** Accent-animatie voor die link. */
+  ctaEffect: "none" | "glow" | "pulse" | "shimmer";
 }
 
 /** Alle designvelden zitten in dezelfde JSON-blob. */
@@ -222,6 +226,8 @@ export const DEFAULT_DISPLAY_PREFS: ProfileDisplayPrefs = {
   locationBadge: null,
   locationVisible: true,
   favoritesLayout: "grid",
+  ctaBlockId: null,
+  ctaEffect: "none",
   ...DEFAULT_DESIGN_PREFS,
 };
 
@@ -400,6 +406,8 @@ export function parseDisplayPrefs(raw: unknown): ProfileDisplayPrefs {
     locationBadge: textOrNull(r["locationBadge"], 60),
     locationVisible: r["locationVisible"] === undefined ? true : Boolean(r["locationVisible"]),
     favoritesLayout: oneOf(r["favoritesLayout"], [...FAVORITE_LAYOUTS], "grid"),
+    ctaBlockId: textOrNull(r["ctaBlockId"], 60),
+    ctaEffect: oneOf(r["ctaEffect"], ["none", "glow", "pulse", "shimmer"], "none"),
     ...normalizeDesignPrefs(r),
   };
 }
