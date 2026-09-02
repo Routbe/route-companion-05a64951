@@ -403,7 +403,7 @@ export function ProfileView({
 
         {prefs.badgeShowcaseVisible && <BadgeShowcase userId={profile.id} theme={t} />}
 
-        <FavoritesShowcase favorites={prefs.favorites} theme={t} />
+        <FavoritesShowcase favorites={prefs.favorites} theme={t} layout={prefs.favoritesLayout} />
 
         {/* Geverifieerde socials met gecachte volgeraantallen (0 externe calls).
             Mode 1 = icoon + gebruikersnaam met vinkje ernaast; mode 2 = alleen

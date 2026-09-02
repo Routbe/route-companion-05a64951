@@ -98,7 +98,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { HandleErrorBanner } from "@/components/HandleValidationMessage";
 import { VerifiedHandleBuilder } from "@/components/settings/VerifiedHandleBuilder";
-import { FavoritesEditor } from "@/components/dashboard/FavoritesEditor";
+import { ProfileFavoritesAccordion } from "@/components/studio/ProfileFavoritesAccordion";
 import { MAX_FAVORITES } from "@/lib/favorites";
 import { ProfileView } from "@/components/profile/ProfileView";
 import { VerificationPanel } from "@/components/dashboard/VerificationPanel";
@@ -823,25 +823,12 @@ export function ProfileEditor({ variant = "verified" }: { variant?: ProfileVaria
               </ProfileContentAccordion>
 
               {/* Favorieten horen bij je links: film, serie, boek, muziek … */}
-              <AccordionItem
-                value="favorites"
-                className="rounded-2xl border border-border bg-card px-4 sm:px-5"
-              >
-                <AccordionTrigger className="hover:no-underline">
-                  <span className="flex flex-1 items-center justify-between gap-3 pr-2">
-                    <span className="text-base font-medium">⭐ Favorieten</span>
-                    <span className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground">
-                      {prefs.favorites.length}/{MAX_FAVORITES}
-                    </span>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="space-y-4 pb-5">
-                  <FavoritesEditor
-                    value={prefs.favorites}
-                    onChange={(next) => setPref("favorites", next)}
-                  />
-                </AccordionContent>
-              </AccordionItem>
+              <ProfileFavoritesAccordion
+                favorites={prefs.favorites}
+                onFavoritesChange={(next) => setPref("favorites", next)}
+                layout={prefs.favoritesLayout}
+                onLayoutChange={(next) => setPref("favoritesLayout", next)}
+              />
 
               <AccordionItem
                 value="conversion_tips"
